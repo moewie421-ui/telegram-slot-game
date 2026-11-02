@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Sunset Slot - နေဝင် slots</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg-top: #1a0b2e; --bg-bottom: #4c1c5c;
+            --sunset-orange: #ff6b35; --sunset-pink: #f72585; --gold: #ffd700;
+            --panel-bg: rgba(20, 10, 35, 0.85);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; font-family: sans-serif; }
+        body { background: linear-gradient(180deg, var(--bg-top), var(--bg-bottom)); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: space-between; color: #fff; padding: 15px; }
+        .header { width: 100%; max-width: 400px; display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background: var(--panel-bg); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); }
+        .balance-val { font-size: 18px; font-weight: bold; color: var(--gold); }
+        .btn-sm { padding: 6px 10px; font-size: 11px; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; }
+        .btn-dep { background: #2ec4b6; color: #fff; }
+        .btn-wit { background: #e71d36; color: #fff; }
+        .machine-container { width: 100%; max-width: 400px; background: var(--panel-bg); border-radius: 20px; padding: 20px 15px; border: 2px solid var(--sunset-orange); text-align: center; }
+        .title-logo { font-size: 22px; font-weight: 900; color: var(--gold); margin-bottom: 15px; }
+        .reels-wrapper { display: flex; justify-content: space-around; background: #000; border-radius: 12px; padding: 10px; margin-bottom: 15px; }
+        .reel { width: 30%; height: 120px; background: #110822; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 55px; }
+        .bet-controls { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 8px; margin-bottom: 15px; }
+        .spin-btn { width: 100%; padding: 15px; font-size: 20px; font-weight: bold; color: #fff; background: linear-gradient(45deg, var(--sunset-orange), var(--sunset-pink)); border: none; border-radius: 12px; cursor: pointer; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); justify-content: center; align-items: center; padding: 20px; z-index: 100; }
+        .modal-content { background: #1a0b2e; border: 1px solid var(--sunset-orange); border-radius: 15px; padding: 20px; width: 100%; max-width: 350px; position: relative; }
+        .close-btn { position: absolute; top: 10px; right: 15px; color: #aaa; font-size: 20px; cursor: pointer; }
+        .input-group { margin-bottom: 12px; text-align: left; }
+        .input-group label { display: block; font-size: 12px; color: #ccc; margin-bottom: 4px; }
+        .input-group input, .input-group select { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: #0d0517; color: #fff; }
+        .submit-btn { width: 100%; padding: 12px; background: var(--sunset-orange); color: #fff; border: none; border-radius: 8px; font-weight: bold; margin-top: 10px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div>
+            <div style="font-size: 12px; color: #aaa;" id="userName">PLAYER</div>
+            <div class="balance-val" id="balanceDisplay">Loading...</div>
+        </div>
+        <div>
+            <button class="btn-sm btn-dep" onclick="openModal('depositModal')">ငွေသွင်း</button>
+            <button class="btn-sm btn-wit" onclick="openModal('withdrawModal')">ငွေထုတ်</button>
+        </div>
+    </div>
+
+    <div class="machine-container">
+        <div class="title-logo">🌅 နေဝင် Slots</div>
+        <div class="reels-wrapper">
+            <div class="reel"><div id="reel1">🍒</div></div>
+            <div class="reel"><div id="reel2">🔔</div></div>
+            <div class="reel"><div id="reel3">🍋</div></div>
+        </div>
+        <div class="bet-controls">
+            <button onclick="changeBet(-100)">-</button>
+            <span>BET: <b id="betDisplay" style="color:var(--gold);">500</b></span>
+            <button onclick="changeBet(100)">+</button>
+        </div>
+        <button class="spin-btn" id="spinBtn" onclick="spin()">SPIN</button>
+    </div>
+
+    <!-- Deposit Modal -->
+    <div class="modal" id="depositModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('depositModal')">&times;</span>
+            <div style="color:var(--gold); margin-bottom:10px;">ငွေဖြည့်သွင်းရန်</div>
+            <div style="font-size:13px; margin-bottom:10px;">KPay / Wave: <b style="color:var(--gold)">09784896797</b></div>
+            <div class="input-group">
+                <label>ပမာဏ (MMK)</label>
+                <input type="number" id="depAmount">
+            </div>
+            <button class="submit-btn" onclick="submitDeposit()">Admin (@RoyalShin1) ထံ စလစ်ပို့ရန်</button>
+        </div>
+    </div>
+
+    <!-- Withdraw Modal -->
+    <div class="modal" id="withdrawModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('withdrawModal')">&times;</span>
+            <div style="color:#e71d36; margin-bottom:10px;">ငွေထုတ်ယူရန်</div>
+            <div class="input-group">
+                <label>ပမာဏ (MMK)</label>
+                <input type="number" id="witAmount">
+            </div>
+            <div class="input-group">
+                <label>KPay / Wave နံပါတ်</label>
+                <input type="text" id="witPhone" placeholder="09xxxxxxxxx">
+            </div>
+            <button class="submit-btn" style="background:#e71d36;" onclick="submitWithdraw()">ငွေထုတ်လွှာ ပို့ရန်</button>
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram?.WebApp;
+        if (tg) tg.expand();
+
+        let user = {
+            telegram_id: tg?.initDataUnsafe?.user?.id?.toString() || "test_user_" + Math.floor(Math.random()*1000),
+            username: tg?.initDataUnsafe?.user?.first_name || "Guest",
+            balance: 1000
+        };
+
+        document.getElementById('userName').innerText = user.username;
+
+        // Fetch User Data from Server
+        async function initUser() {
+            try {
+                let res = await fetch('/api/user', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ telegram_id: user.telegram_id, username: user.username })
+                });
+                let data = await res.json();
+                user.balance = data.balance;
+                updateUI();
+            } catch(e) {
+                console.error(e);
+            }
+        }
+        initUser();
+
+        let bet = 500;
+        let isSpinning = false;
+        const symbols = ['🍋', '🔔', '⭐', '💎', '7️⃣'];
+
+        function updateUI() {
+            document.getElementById('balanceDisplay').innerText = user.balance.toLocaleString();
+            document.getElementById('betDisplay').innerText = bet.toLocaleString();
+        }
+
+        function changeBet(val) {
+            if (!isSpinning && bet + val >= 100 && bet + val <= user.balance) {
+                bet += val;
+                updateUI();
+            }
+        }
+
+        async function updateServerBalance(newBal) {
+            user.balance = newBal;
+            updateUI();
+            await fetch('/api/update-balance', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ telegram_id: user.telegram_id, new_balance: user.balance })
+            });
+        }
+
+        function spin() {
+            if (isSpinning) return;
+            if (user.balance < bet) {
+                alert('လက်ကျန်ငွေ မလုံလောက်ပါ။');
+                return;
+            }
+
+            updateServerBalance(user.balance - bet);
+            isSpinning = true;
+            document.getElementById('spinBtn').disabled = true;
+
+            let r1 = document.getElementById('reel1');
+            let r2 = document.getElementById('reel2');
+            let r3 = document.getElementById('reel3');
+
+            let interval = setInterval(() => {
+                r1.innerText = symbols[Math.floor(Math.random() * symbols.length)];
+                r2.innerText = symbols[Math.floor(Math.random() * symbols.length)];
+                r3.innerText = symbols[Math.floor(Math.random() * symbols.length)];
+            }, 80);
+
+            setTimeout(() => {
+                clearInterval(interval);
+                let res1 = symbols[Math.floor(Math.random() * symbols.length)];
+                let res2 = symbols[Math.floor(Math.random() * symbols.length)];
+                let res3 = symbols[Math.floor(Math.random() * symbols.length)];
+
+                r1.innerText = res1; r2.innerText = res2; r3.innerText = res3;
+
+                let win = 0;
+                if (res1 === res2 && res2 === res3) {
+                    win = res1 === '7️⃣' ? bet * 50 : bet * 10;
+                } else if (res1 === res2 || res2 === res3 || res1 === res3) {
+                    win = Math.floor(bet * 1.2);
+                }
+
+                if (win > 0) {
+                    updateServerBalance(user.balance + win);
+                    alert(`အနိုင်ရရှိသည်: ${win} MMK`);
+                }
+                isSpinning = false;
+                document.getElementById('spinBtn').disabled = false;
+            }, 1500);
+        }
+
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+        function submitDeposit() {
+            let amt = document.getElementById('depAmount').value;
+            if(!amt) return;
+            window.open(`https://t.me/RoyalShin1?text=[ငွေသွင်း]%0AID:${user.telegram_id}%0Aပမာဏ:${amt}`, '_blank');
+            closeModal('depositModal');
+        }
+
+        function submitWithdraw() {
+            let amt = document.getElementById('witAmount').value;
+            let phone = document.getElementById('witPhone').value;
+            if(!amt || !phone) return;
+            window.open(`https://t.me/RoyalShin1?text=[ငွေထုတ်]%0AID:${user.telegram_id}%0Aပမာဏ:${amt}%0APhone:${phone}`, '_blank');
+            closeModal('withdrawModal');
+        }
+    </script>
+</body>
+</html>
